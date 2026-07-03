@@ -19,12 +19,6 @@ on visualization of the ANCOM-BC2 result objects:
 pak::pak("KitHubb/ancombcVizhelper")
 ```
 
-To install a tagged release:
-
-```r
-pak::pak("github::KitHubb/ancombcVizhelper@v1.0.0")
-```
-
 
 
 ## Quick start
@@ -118,8 +112,3 @@ After confirming the images, remove the HTML comment markers in the
 | `res_pair` | All pairwise directional comparisons with mdFDR control. |
 | `res_dunn` | Comparisons of each group against a predefined reference group. |
 | `res_trend` | Ordered trend testing across groups. |
-
-## Citation
-
-Please cite the ANCOMBC package and the ANCOM-BC2 publication when using this
-package for scientific work.
