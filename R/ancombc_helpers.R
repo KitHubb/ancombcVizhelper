@@ -288,33 +288,59 @@
                          dplyr::select(dplyr::all_of("taxon")), by = "taxon")
   }
 
-  df_final <- df_final |>
-    dplyr::filter(base::is.finite(.data$lfc)) |>
-    dplyr::mutate(
-      significant = dplyr::coalesce(.data$significant, FALSE),
-      passed_ss = dplyr::coalesce(.data$passed_ss, FALSE),
-      robust = .data$significant &
-        .data$passed_ss,
-      display = base::ifelse(
-        sensitivity == "robust_only",
-        .data$robust,
-        .data$significant
-      ),
-      plot_value = base::ifelse(.data$display, .data$lfc, 0),
-      label = base::ifelse(
-        .data$display,
-        base::sprintf("%.2f", .data$lfc),
-        ""
+  df_final <- df_final[
+    base::is.finite(df_final$lfc),
+    ,
+    drop = FALSE
+  ]
+
+  df_final$significant <- base::as.logical(df_final$significant)
+  df_final$passed_ss <- base::as.logical(df_final$passed_ss)
+
+  df_final$significant[
+    base::is.na(df_final$significant)
+  ] <- FALSE
+
+  df_final$passed_ss[
+    base::is.na(df_final$passed_ss)
+  ] <- FALSE
+
+  df_final$robust <- df_final$significant &
+    df_final$passed_ss
+
+  df_final$display <- if (
+    base::identical(sensitivity, "robust_only")
+  ) {
+    df_final$robust
+  } else {
+    df_final$significant
+  }
+
+  df_final$plot_value <- base::ifelse(
+    df_final$display,
+    df_final$lfc,
+    0
+  )
+
+  df_final$label <- base::ifelse(
+    df_final$display,
+    base::sprintf("%.2f", df_final$lfc),
+    ""
+  )
+
+  if (!show_all) {
+
+    taxa_to_keep <- base::unique(
+      base::as.character(
+        df_final$taxon[df_final$display %in% TRUE]
       )
     )
 
-  if (!show_all) {
-    taxa_to_keep <- df_final |>
-      dplyr::filter(.data$display) |>
-      dplyr::distinct(.data$taxon)
-
-    df_final <- df_final |>
-      dplyr::semi_join(taxa_to_keep, by = "taxon")
+    df_final <- df_final[
+      base::as.character(df_final$taxon) %in% taxa_to_keep,
+      ,
+      drop = FALSE
+    ]
   }
 
   if (base::nrow(df_final) == 0) {

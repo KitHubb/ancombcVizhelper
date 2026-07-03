@@ -1,4 +1,4 @@
-# ancombchelper
+# ancombVizchelper (developing)
 
 Helper functions for tidying and visualizing ANCOM-BC2 differential abundance results.
 

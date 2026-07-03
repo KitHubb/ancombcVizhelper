@@ -1,0 +1,297 @@
+---
+title: "ANCOM-BC2 Analysis and Visualization with ancombcVizhelper"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ANCOM-BC2 Analysis and Visualization with ancombcVizhelper}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 11,
+  fig.height = 6,
+  out.width = "100%"
+)
+```
+
+## Overview
+
+This vignette demonstrates an end-to-end ANCOM-BC2 workflow using the
+`atlas1006` example dataset from the `microbiome` package.
+
+The data preparation and ANCOM-BC2 model specification are adapted from the
+ANCOM-BC2 tutorial. The visualization stage uses `ancombcVizhelper` instead of
+manually reshaping ANCOM-BC2 result tables for each plot.
+
+The workflow includes:
+
+1. Loading and preparing the `atlas1006` dataset.
+2. Running ANCOM-BC2 with BMI as the grouping variable.
+3. Inspecting the ANCOM-BC2 result tables.
+4. Creating global-test heatmaps and bar plots.
+5. Showing code patterns for pairwise, Dunnett-type, and trend results.
+
+## Load and Prepare the Example Data
+
+```{r load-data}
+utils::data("atlas1006", package = "microbiome")
+
+ps <- atlas1006
+
+# Baseline samples only
+ps <- phyloseq::subset_samples(
+  ps,
+  time == 0
+)
+
+meta <- phyloseq::sample_data(ps) |>
+  base::as.data.frame()
+
+meta$bmi <- dplyr::recode(
+  meta$bmi_group,
+  obese = "obese",
+  severeobese = "obese",
+  morbidobese = "obese"
+)
+
+meta$region <- dplyr::recode(
+  base::as.character(meta$nationality),
+  Scandinavia = "NE",
+  UKIE = "NE",
+  SouthEurope = "SE",
+  CentralEurope = "CE",
+  EasternEurope = "EE",
+  .missing = "unknown"
+)
+
+meta$bmi <- base::factor(
+  meta$bmi,
+  levels = c("obese", "overweight", "lean")
+)
+
+phyloseq::sample_data(ps) <- meta
+
+# Keep requested BMI groups and valid regions
+ps <- phyloseq::subset_samples(
+  ps,
+  bmi %in% c("obese", "overweight", "lean") &
+    !region %in% c("EE", "unknown")
+)
+
+# Remove any taxa that became zero after sample filtering
+ps <- phyloseq::prune_taxa(
+  phyloseq::taxa_sums(ps) > 0,
+  ps
+)
+```
+
+## Run ANCOM-BC2
+
+The tutorial uses a small number of bootstrap iterations for the trend test to
+reduce execution time. This vignette keeps `B = 10` for demonstration only.
+
+For a final analysis, use the ANCOM-BC2 default or a larger value such as
+`B = 100` or higher.
+
+```{r run-ancombc2}
+set.seed(42)
+
+
+output <- ANCOMBC::ancombc2(
+  data = ps,
+  assay_name = "counts",
+  tax_level = "Family",
+  fix_formula = "age + region + bmi",
+  rand_formula = NULL,
+  p_adj_method = "holm",
+  pseudo_sens = TRUE,
+  prv_cut = 0.10,
+  lib_cut = 1000,
+  s0_perc = 0.05,
+  group = "bmi",
+  struc_zero = TRUE,
+  neg_lb = TRUE,
+  alpha = 0.05,
+  n_cl = 1,
+  verbose = TRUE,
+  global = TRUE,
+  pairwise = TRUE,
+  dunnet = TRUE,
+  trend = TRUE,
+  iter_control = base::list(
+    tol = 1e-2,
+    max_iter = 20,
+    verbose = TRUE
+  ),
+  em_control = base::list(tol = 1e-5, max_iter = 100),
+  lme_control = lme4::lmerControl(),
+  mdfdr_control = base::list(fwer_ctrl_method = "holm", B = 100),
+  trend_control = base::list(
+    contrast = base::list(
+      base::matrix(c(1, 0, -1, 1), nrow = 2, byrow = TRUE),
+      base::matrix(c(-1, 0, 1, -1), nrow = 2, byrow = TRUE),
+      base::matrix(c(1, 0, 1, -1), nrow = 2, byrow = TRUE)
+    ),
+    node = base::list(2, 2, 1),
+    solver = "ECOS",
+    B = 10
+  )
+)
+```
+
+## Inspect the ANCOM-BC2 Result Object
+
+```{r inspect-results}
+base::names(output)
+```
+
+The primary result components used by `ancombcVizhelper` are:
+
+| Result object | Purpose |
+|---|---|
+| `output$res` | Primary regression coefficients and covariate effects |
+| `output$res_global` | Taxon-level global test across BMI groups |
+| `output$res_pair` | Pairwise directional comparisons with mdFDR control |
+| `output$res_dunn` | Dunnett-type comparisons against the reference BMI group |
+| `output$res_trend` | Ordered trend-test results |
+| `output$zero_ind` | Structural-zero indicators |
+
+## Global-Test Heatmap
+
+The global test first identifies taxa with evidence of an overall difference
+among BMI groups. The displayed log-fold changes are the BMI coefficients from
+`output$res`.
+
+```{r global-heatmap}
+global_heatmap <- ancombcVizhelper::make_heatmap(
+  out = output,
+  result = "res_global",
+  prefix = "bmi",
+  title = "Global ANCOM-BC2 BMI-associated families",
+  sensitivity = "keep",
+  show_all = FALSE
+)
+
+global_heatmap$plot
+```
+
+Structural-zero taxa are excluded from log-fold change plots because their
+coefficients are not estimated by the standard ANCOM-BC2 model.
+
+```{r structural-zeros}
+utils::head(global_heatmap$structural_zero)
+```
+
+## Global-Test Bar Plot
+
+Bars show the BMI model coefficients for families selected by the global test.
+
+Error bars represent plus or minus one standard error. Positive log-fold
+changes are red and negative log-fold changes are blue. Fully opaque bars are
+sensitivity-robust, whereas semi-transparent bars did not pass the
+pseudo-count sensitivity criterion.
+
+```{r global-barplot}
+global_barplot <- ancombcVizhelper::make_barplots(
+  out = output,
+  result = "res_global",
+  prefix = "bmi",
+  title = "BMI coefficients for globally significant families",
+  sensitivity = "keep",
+  show_all = FALSE,
+  group_order = "mean",
+  order = "asc"
+)
+
+global_barplot$plot
+```
+
+## Pairwise Directional Comparisons
+
+`res_pair` is appropriate when all pairwise directional contrasts are of
+interest. The `diff_*` results in this object correspond to mdFDR-controlled
+pairwise inference.
+
+```{r pairwise-heatmap, eval = FALSE}
+pairwise_heatmap <- ancombcVizhelper::make_heatmap(
+  out = output,
+  result = "res_pair",
+  prefix = "bmi",
+  title = "Pairwise BMI comparisons",
+  sensitivity = "keep",
+  show_all = FALSE
+)
+pairwise_heatmap$plot
+
+```
+
+## Dunnett-Type Comparisons
+
+`res_dunn` is useful when each BMI group is compared with the reference group.
+In this workflow, the reference group is `obese`.
+
+```{r dunnett-heatmap, eval = FALSE}
+dunnett_heatmap <- ancombcVizhelper::make_heatmap(
+  out = output,
+  result = "res_dunn",
+  prefix = "bmi",
+  title = "BMI comparisons against obese participants",
+  sensitivity = "keep",
+  show_all = FALSE
+)
+
+dunnett_heatmap$plot
+
+```
+
+## Trend-Test Results
+
+The trend test identifies taxa showing the specified ordered patterns across
+BMI groups. The log-fold changes shown in the heatmap are fitted BMI
+coefficients, while significance is determined by the taxon-level trend test.
+
+```{r trend-heatmap, eval = FALSE}
+trend_heatmap <- ancombcVizhelper::make_heatmap(
+  out = output,
+  result = "res_trend",
+  prefix = "bmi",
+  title = "BMI trend-test results",
+  sensitivity = "keep",
+  show_all = FALSE
+)
+
+trend_heatmap$plot
+```
+
+## Primary Result for a Continuous Covariate
+
+For a continuous covariate such as age, `result = "res"` is appropriate
+because there is one regression coefficient rather than multiple BMI contrasts.
+
+```{r age-barplot, eval = FALSE}
+age_barplot <- ancombcVizhelper::make_barplots(
+  out = output,
+  result = "res",
+  prefix = "age",
+  title = "Family-level associations with age",
+  sensitivity = "keep",
+  show_all = FALSE,
+  group_order = "mean",
+  order = "asc"
+)
+
+age_barplot$plot
+```
+
+## Interpretation Notes
+
+- Use `res_global` to select taxa based on an overall group difference.
+- Use `res_pair` for all pairwise directional comparisons with mdFDR control.
+- Use `res_dunn` for comparisons against a predefined reference group.
+- Use `res_trend` when an ordered group trend was specified in `ancombc2()`.
+- Use `res` primarily for continuous covariates or a single coefficient.
+- Use `sensitivity = "robust_only"` when only taxa passing pseudo-count
+  sensitivity analysis should be displayed.
