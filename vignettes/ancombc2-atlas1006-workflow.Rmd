@@ -19,12 +19,9 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-This vignette demonstrates an end-to-end ANCOM-BC2 workflow using the
-`atlas1006` example dataset from the `microbiome` package.
+This vignette demonstrates an end-to-end ANCOM-BC2 workflow using the `atlas1006` example dataset from the `microbiome` package.
 
-The data preparation and ANCOM-BC2 model specification are adapted from the
-ANCOM-BC2 tutorial. The visualization stage uses `ancombcVizhelper` instead of
-manually reshaping ANCOM-BC2 result tables for each plot.
+The data preparation and ANCOM-BC2 model specification are adapted from the ANCOM-BC2 tutorial. The visualization stage uses `ancombcVizhelper` instead of manually reshaping ANCOM-BC2 result tables for each plot.
 
 The workflow includes:
 
@@ -90,11 +87,9 @@ ps <- phyloseq::prune_taxa(
 
 ## Run ANCOM-BC2
 
-The tutorial uses a small number of bootstrap iterations for the trend test to
-reduce execution time. This vignette keeps `B = 10` for demonstration only.
+The tutorial uses a small number of bootstrap iterations for the trend test to reduce execution time. This vignette keeps `B = 10` for demonstration only.
 
-For a final analysis, use the ANCOM-BC2 default or a larger value such as
-`B = 100` or higher.
+For a final analysis, use the ANCOM-BC2 default or a larger value such as `B = 100` or higher.
 
 ```{r run-ancombc2}
 set.seed(42)
@@ -161,8 +156,7 @@ The primary result components used by `ancombcVizhelper` are:
 
 ## Global-Test Heatmap
 
-The global test first identifies taxa with evidence of an overall difference
-among BMI groups. The displayed log-fold changes are the BMI coefficients from
+The global test first identifies taxa with evidence of an overall difference among BMI groups. The displayed log-fold changes are the BMI coefficients from
 `output$res`.
 
 ```{r global-heatmap}
@@ -187,12 +181,7 @@ utils::head(global_heatmap$structural_zero)
 
 ## Global-Test Bar Plot
 
-Bars show the BMI model coefficients for families selected by the global test.
-
-Error bars represent plus or minus one standard error. Positive log-fold
-changes are red and negative log-fold changes are blue. Fully opaque bars are
-sensitivity-robust, whereas semi-transparent bars did not pass the
-pseudo-count sensitivity criterion.
+Bars show the BMI model coefficients for families selected by the global test. Error bars represent plus or minus one standard error. Positive log-fold changes are red and negative log-fold changes are blue. Fully opaque bars are sensitivity-robust, whereas semi-transparent bars did not pass the pseudo-count sensitivity criterion.
 
 ```{r global-barplot}
 global_barplot <- ancombcVizhelper::make_barplots(
@@ -211,9 +200,7 @@ global_barplot$plot
 
 ## Pairwise Directional Comparisons
 
-`res_pair` is appropriate when all pairwise directional contrasts are of
-interest. The `diff_*` results in this object correspond to mdFDR-controlled
-pairwise inference.
+`res_pair` is appropriate when all pairwise directional contrasts are of interest. The `diff_*` results in this object correspond to mdFDR-controlled pairwise inference.
 
 ```{r pairwise-heatmap, eval = FALSE}
 pairwise_heatmap <- ancombcVizhelper::make_heatmap(
@@ -230,8 +217,7 @@ pairwise_heatmap$plot
 
 ## Dunnett-Type Comparisons
 
-`res_dunn` is useful when each BMI group is compared with the reference group.
-In this workflow, the reference group is `obese`.
+`res_dunn` is useful when each BMI group is compared with the reference group. In this workflow, the reference group is `obese`.
 
 ```{r dunnett-heatmap, eval = FALSE}
 dunnett_heatmap <- ancombcVizhelper::make_heatmap(
@@ -268,8 +254,7 @@ trend_heatmap$plot
 
 ## Primary Result for a Continuous Covariate
 
-For a continuous covariate such as age, `result = "res"` is appropriate
-because there is one regression coefficient rather than multiple BMI contrasts.
+For a continuous covariate such as age, `result = "res"` is appropriate because there is one regression coefficient rather than multiple BMI contrasts.
 
 ```{r age-barplot, eval = FALSE}
 age_barplot <- ancombcVizhelper::make_barplots(
