@@ -1,7 +1,7 @@
 Package: ancombcVizhelper
 Type: Package
 Title: Tidy and Visualize Results from ANCOM-BC2
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R:
     person(
         given = "So-Yeon",
@@ -20,7 +20,18 @@ BugReports: https://github.com/KitHubb/ancombcVizhelper/issues
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
+Depends:
+    R (>= 4.1.0)
+Imports:
+    dplyr,
+    ggplot2,
+    grid,
+    patchwork,
+    rlang,
+    tibble,
+    tidyr
 Suggests:
+    ANCOMBC,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0
