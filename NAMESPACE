@@ -2,3 +2,4 @@
 
 export(make_barplots)
 export(make_heatmap)
+importFrom(rlang,.data)

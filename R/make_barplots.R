@@ -18,6 +18,7 @@
 #'
 #' @return A list with `data`, `structural_zero`, `result_type`,
 #'   `inference_note`, and `plot`.
+#' @importFrom rlang .data
 #' @export
 make_barplots <- function(out,
                           result = base::c("res", "res_pair", "res_dunn", "res_global", "res_trend"),
@@ -41,8 +42,8 @@ make_barplots <- function(out,
 
   df_final <- prepared$data |>
     dplyr::mutate(
-      taxon = base::as.character(rlang::.data$taxon),
-      comparison = base::as.character(rlang::.data$comparison)
+      taxon = base::as.character(.data$taxon),
+      comparison = base::as.character(.data$comparison)
     )
 
   se_source_name <- if (result == "res_global") {
@@ -71,31 +72,31 @@ make_barplots <- function(out,
       names_to = "comparison",
       values_to = "se"
     ) |>
-    dplyr::mutate(comparison = base::sub("^se_", "", rlang::.data$comparison))
+    dplyr::mutate(comparison = base::sub("^se_", "", .data$comparison))
 
   df_final <- df_final |>
     dplyr::left_join(df_se, by = base::c("taxon", "comparison"))
 
   if (sensitivity == "robust_only") {
     df_final <- df_final |>
-      dplyr::mutate(bar_lfc = base::ifelse(rlang::.data$robust, rlang::.data$lfc, NA_real_))
+      dplyr::mutate(bar_lfc = base::ifelse(.data$robust, .data$lfc, NA_real_))
   } else {
     df_final <- df_final |>
-      dplyr::mutate(bar_lfc = rlang::.data$lfc)
+      dplyr::mutate(bar_lfc = .data$lfc)
   }
 
   df_final <- df_final |>
     dplyr::mutate(
-      se_lower = rlang::.data$bar_lfc -
-        rlang::.data$se,
-      se_upper = rlang::.data$bar_lfc +
-        rlang::.data$se,
-      direction = base::ifelse(rlang::.data$bar_lfc >= 0, "positive", "negative"),
-      alpha_value = base::ifelse(rlang::.data$robust, 1, 0.5)
+      se_lower = .data$bar_lfc -
+        .data$se,
+      se_upper = .data$bar_lfc +
+        .data$se,
+      direction = base::ifelse(.data$bar_lfc >= 0, "positive", "negative"),
+      alpha_value = base::ifelse(.data$robust, 1, 0.5)
     )
 
   displayed_lfc <- df_final |>
-    dplyr::filter(base::is.finite(rlang::.data$bar_lfc))
+    dplyr::filter(base::is.finite(.data$bar_lfc))
 
   if (base::nrow(displayed_lfc) == 0) {
     base::stop("No log-fold changes are available for display. ",
@@ -123,44 +124,44 @@ make_barplots <- function(out,
 
   } else if (group_order == "mean") {
     taxon_summary <- df_final |>
-      dplyr::group_by(rlang::.data$taxon) |>
+      dplyr::group_by(.data$taxon) |>
       dplyr::summarise(
-        mean_lfc = base::mean(rlang::.data$bar_lfc, na.rm = TRUE),
+        mean_lfc = base::mean(.data$bar_lfc, na.rm = TRUE),
         .groups = "drop"
       ) |>
       dplyr::mutate(mean_lfc = base::ifelse(
-        base::is.nan(rlang::.data$mean_lfc),
+        base::is.nan(.data$mean_lfc),
         NA_real_,
-        rlang::.data$mean_lfc
+        .data$mean_lfc
       ))
 
     if (order == "asc") {
       taxon_order <- taxon_summary |>
-        dplyr::arrange(base::is.na(rlang::.data$mean_lfc),
-                       rlang::.data$mean_lfc) |>
-        dplyr::pull(rlang::.data$taxon)
+        dplyr::arrange(base::is.na(.data$mean_lfc),
+                       .data$mean_lfc) |>
+        dplyr::pull(.data$taxon)
     } else {
       taxon_order <- taxon_summary |>
-        dplyr::arrange(base::is.na(rlang::.data$mean_lfc),
-                       dplyr::desc(rlang::.data$mean_lfc)) |>
-        dplyr::pull(rlang::.data$taxon)
+        dplyr::arrange(base::is.na(.data$mean_lfc),
+                       dplyr::desc(.data$mean_lfc)) |>
+        dplyr::pull(.data$taxon)
     }
 
   } else if (group_order %in% groups) {
     taxon_summary <- df_final |>
-      dplyr::filter(rlang::.data$comparison == group_order) |>
+      dplyr::filter(.data$comparison == group_order) |>
       dplyr::select(dplyr::all_of(base::c("taxon", "bar_lfc")))
 
     if (order == "asc") {
       taxon_order <- taxon_summary |>
-        dplyr::arrange(base::is.na(rlang::.data$bar_lfc),
-                       rlang::.data$bar_lfc) |>
-        dplyr::pull(rlang::.data$taxon)
+        dplyr::arrange(base::is.na(.data$bar_lfc),
+                       .data$bar_lfc) |>
+        dplyr::pull(.data$taxon)
     } else {
       taxon_order <- taxon_summary |>
-        dplyr::arrange(base::is.na(rlang::.data$bar_lfc),
-                       dplyr::desc(rlang::.data$bar_lfc)) |>
-        dplyr::pull(rlang::.data$taxon)
+        dplyr::arrange(base::is.na(.data$bar_lfc),
+                       dplyr::desc(.data$bar_lfc)) |>
+        dplyr::pull(.data$taxon)
     }
 
   } else {
@@ -172,24 +173,24 @@ make_barplots <- function(out,
 
   df_final <- df_final |>
     dplyr::mutate(
-      taxon = base::factor(rlang::.data$taxon, levels = taxon_order),
-      comparison = base::factor(rlang::.data$comparison, levels = groups),
-      direction = base::factor(rlang::.data$direction, levels = base::c("negative", "positive"))
+      taxon = base::factor(.data$taxon, levels = taxon_order),
+      comparison = base::factor(.data$comparison, levels = groups),
+      direction = base::factor(.data$direction, levels = base::c("negative", "positive"))
     )
 
   plots <- base::lapply(base::seq_along(groups), function(i) {
     g <- groups[i]
 
     panel_data <- df_final |>
-      dplyr::filter(rlang::.data$comparison == g)
+      dplyr::filter(.data$comparison == g)
 
     p <- ggplot2::ggplot(
       panel_data,
       ggplot2::aes(
-        x = rlang::.data$taxon,
-        y = rlang::.data$bar_lfc,
-        fill = rlang::.data$direction,
-        alpha = rlang::.data$alpha_value
+        x = .data$taxon,
+        y = .data$bar_lfc,
+        fill = .data$direction,
+        alpha = .data$alpha_value
       )
     ) +
       ggplot2::geom_col(width = 0.7,
@@ -197,8 +198,8 @@ make_barplots <- function(out,
                         na.rm = TRUE) +
       ggplot2::geom_errorbar(
         ggplot2::aes(
-          ymin = rlang::.data$se_lower,
-          ymax = rlang::.data$se_upper
+          ymin = .data$se_lower,
+          ymax = .data$se_upper
         ),
         width = 0.18,
         color = "black",

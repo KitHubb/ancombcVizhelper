@@ -153,7 +153,7 @@
         names_to = "comparison",
         values_to = "lfc"
       ) |>
-      dplyr::mutate(comparison = base::sub("^lfc_", "", rlang::.data$comparison))
+      dplyr::mutate(comparison = base::sub("^lfc_", "", .data$comparison))
 
     df_diff <- result_tbl |>
       dplyr::select(dplyr::all_of(base::c("taxon", diff_cols))) |>
@@ -163,8 +163,8 @@
         values_to = "significant"
       ) |>
       dplyr::mutate(
-        comparison = base::sub("^diff_", "", rlang::.data$comparison),
-        significant = base::as.logical(rlang::.data$significant)
+        comparison = base::sub("^diff_", "", .data$comparison),
+        significant = base::as.logical(.data$significant)
       )
 
     df_ss <- result_tbl |>
@@ -175,8 +175,8 @@
         values_to = "passed_ss"
       ) |>
       dplyr::mutate(
-        comparison = base::sub("^passed_ss_", "", rlang::.data$comparison),
-        passed_ss = base::as.logical(rlang::.data$passed_ss)
+        comparison = base::sub("^passed_ss_", "", .data$comparison),
+        passed_ss = base::as.logical(.data$passed_ss)
       )
 
     df_final <- df_lfc |>
@@ -225,13 +225,13 @@
         names_to = "comparison",
         values_to = "lfc"
       ) |>
-      dplyr::mutate(comparison = base::sub("^lfc_", "", rlang::.data$comparison))
+      dplyr::mutate(comparison = base::sub("^lfc_", "", .data$comparison))
 
     df_status <- result_tbl |>
       dplyr::transmute(
-        taxon = rlang::.data$taxon,
-        significant = base::as.logical(rlang::.data$diff_abn),
-        passed_ss = base::as.logical(rlang::.data$passed_ss)
+        taxon = .data$taxon,
+        significant = base::as.logical(.data$diff_abn),
+        passed_ss = base::as.logical(.data$passed_ss)
       )
 
     df_final <- df_lfc |>
@@ -264,13 +264,13 @@
         names_to = "comparison",
         values_to = "lfc"
       ) |>
-      dplyr::mutate(comparison = base::sub("^lfc_", "", rlang::.data$comparison))
+      dplyr::mutate(comparison = base::sub("^lfc_", "", .data$comparison))
 
     df_status <- result_tbl |>
       dplyr::transmute(
-        taxon = rlang::.data$taxon,
-        significant = base::as.logical(rlang::.data$diff_abn),
-        passed_ss = base::as.logical(rlang::.data$passed_ss)
+        taxon = .data$taxon,
+        significant = base::as.logical(.data$diff_abn),
+        passed_ss = base::as.logical(.data$passed_ss)
       )
 
     df_final <- df_lfc |>
@@ -289,29 +289,29 @@
   }
 
   df_final <- df_final |>
-    dplyr::filter(base::is.finite(rlang::.data$lfc)) |>
+    dplyr::filter(base::is.finite(.data$lfc)) |>
     dplyr::mutate(
-      significant = dplyr::coalesce(rlang::.data$significant, FALSE),
-      passed_ss = dplyr::coalesce(rlang::.data$passed_ss, FALSE),
-      robust = rlang::.data$significant &
-        rlang::.data$passed_ss,
+      significant = dplyr::coalesce(.data$significant, FALSE),
+      passed_ss = dplyr::coalesce(.data$passed_ss, FALSE),
+      robust = .data$significant &
+        .data$passed_ss,
       display = base::ifelse(
         sensitivity == "robust_only",
-        rlang::.data$robust,
-        rlang::.data$significant
+        .data$robust,
+        .data$significant
       ),
-      plot_value = base::ifelse(rlang::.data$display, rlang::.data$lfc, 0),
+      plot_value = base::ifelse(.data$display, .data$lfc, 0),
       label = base::ifelse(
-        rlang::.data$display,
-        base::sprintf("%.2f", rlang::.data$lfc),
+        .data$display,
+        base::sprintf("%.2f", .data$lfc),
         ""
       )
     )
 
   if (!show_all) {
     taxa_to_keep <- df_final |>
-      dplyr::filter(rlang::.data$display) |>
-      dplyr::distinct(rlang::.data$taxon)
+      dplyr::filter(.data$display) |>
+      dplyr::distinct(.data$taxon)
 
     df_final <- df_final |>
       dplyr::semi_join(taxa_to_keep, by = "taxon")
@@ -333,8 +333,8 @@
 
   df_final <- df_final |>
     dplyr::mutate(
-      comparison = base::factor(rlang::.data$comparison, levels = comparison_order),
-      taxon = base::factor(rlang::.data$taxon, levels = base::rev(taxon_order))
+      comparison = base::factor(.data$comparison, levels = comparison_order),
+      taxon = base::factor(.data$taxon, levels = base::rev(taxon_order))
     )
 
   base::list(

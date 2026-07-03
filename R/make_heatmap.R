@@ -15,6 +15,7 @@
 #'
 #' @return A list with `data`, `structural_zero`, `result_type`,
 #'   `inference_note`, and `plot`.
+#' @importFrom rlang .data
 #' @export
 make_heatmap <- function(out,
                          result = base::c("res", "res_pair", "res_dunn", "res_global", "res_trend"),
@@ -50,9 +51,9 @@ make_heatmap <- function(out,
   plot <- ggplot2::ggplot(
     df_final,
     ggplot2::aes(
-      x = rlang::.data$comparison,
-      y = rlang::.data$taxon,
-      fill = rlang::.data$plot_value
+      x = .data$comparison,
+      y = .data$taxon,
+      fill = .data$plot_value
     )
   ) +
     ggplot2::geom_tile(color = "black", linewidth = 0.3) +
@@ -65,10 +66,10 @@ make_heatmap <- function(out,
       name = "Log fold change"
     ) +
     ggplot2::geom_text(
-      data = dplyr::filter(df_final, rlang::.data$display),
+      data = dplyr::filter(df_final, .data$display),
       ggplot2::aes(
-        label = rlang::.data$label,
-        color = rlang::.data$robust
+        label = .data$label,
+        color = .data$robust
       ),
       fontface = "bold",
       size = 4
