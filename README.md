@@ -25,18 +25,7 @@ To install a tagged release:
 pak::pak("github::KitHubb/ancombcVizhelper@v1.0.0")
 ```
 
-## Quick start
 
-The input must be the complete object returned by `ANCOMBC::ancombc2()`.
-
-```r
-library(ancombcVizhelper)
-
-global_heatmap <- make_heatmap(
-  out = output,
-  result = "res_global",
-  prefix = "pak::pak("github::KitHubb/ancombcVizhelper@v1.0.0")
-```
 
 ## Quick start
 
