@@ -1,7 +1,7 @@
 Package: ancombcVizhelper
 Type: Package
 Title: Tidy and Visualize Results from ANCOM-BC2
-Version: 1.0.0
+Version: 1.0.1
 Authors@R:
     person(
         given = "So-Yeon",
