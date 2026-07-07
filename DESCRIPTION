@@ -29,7 +29,8 @@ Imports:
     patchwork,
     rlang,
     tibble,
-    tidyr
+    tidyr,
+    scales
 Suggests:
     ANCOMBC,
     knitr,

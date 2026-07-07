@@ -56,6 +56,24 @@ global_barplot <- ancombcVizhelper::make_barplots(
 global_barplot$plot
 ```
 
+```r
+
+dunn_abundance <- ancombcVizhelper::make_abundance_lfc_plot(
+  ps = ps,
+  out = output,
+  result = "res_dunn",
+  prefix = "bmi",
+  group = "bmi",
+  tax_level = "Family",
+  comparison = "lean",
+  groupnames = FALSE,
+  abundance_groups = c("overweight", "lean")
+)
+
+dunn_abundance$plot
+
+```
+
 ## Interpretation
 
 ### Heatmap
@@ -92,6 +110,10 @@ Create and commit the PNG files first, then remove these comment markers.
 ### Global-test bar plot
 
 ![Global-test bar plot](man/figures/README-global-barplot.png)
+
+### Dunn-test abundance & lfc plot
+
+![Dunn-test abudance and lfc plot](man/figures/README-dunn-abundlfc.png)
 
 
 ## Reproducing the example figures
