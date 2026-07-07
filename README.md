@@ -30,18 +30,17 @@ library(ancombcVizhelper)
 
 global_heatmap <- make_heatmap(
   out = output,
-  result = "res_global",
+  result = "res_dunn",
   prefix = "bmi",
   title = "Global ANCOM-BC2 BMI-associated families",
   sensitivity = "keep",
-  show_all = FALSE
+  show_all = FALSE, 
+  groupnames = TRUE
 )
-
-global_heatmap$plot
 ```
 
 ```r
-global_barplot <- make_barplots(
+global_barplot <- ancombcVizhelper::make_barplots(
   out = output,
   result = "res_global",
   prefix = "bmi",
@@ -49,7 +48,9 @@ global_barplot <- make_barplots(
   sensitivity = "keep",
   show_all = FALSE,
   group_order = "mean",
-  order = "asc"
+  order = "asc",  
+  groupnames = FALSE
+
 )
 
 global_barplot$plot
