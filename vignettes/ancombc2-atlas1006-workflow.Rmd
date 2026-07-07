@@ -31,6 +31,15 @@ The workflow includes:
 4. Creating global-test heatmaps and bar plots.
 5. Showing code patterns for pairwise, Dunnett-type, and trend results.
 
+# installation
+```{r}
+# pak("KitHubb/ancombcVizhelper")
+# library(ancombcVizhelper)
+
+
+
+```
+
 ## Load and Prepare the Example Data
 
 ```{r load-data}
@@ -169,7 +178,8 @@ global_heatmap <- ancombcVizhelper::make_heatmap(
   prefix = "bmi",
   title = "Global ANCOM-BC2 BMI-associated families",
   sensitivity = "keep",
-  show_all = FALSE
+  show_all = FALSE, 
+  groupnames = TRUE
 )
 
 global_heatmap$plot
@@ -196,7 +206,9 @@ global_barplot <- ancombcVizhelper::make_barplots(
   sensitivity = "keep",
   show_all = FALSE,
   group_order = "mean",
-  order = "asc"
+  order = "asc",  
+  groupnames = FALSE
+
 )
 
 global_barplot$plot
