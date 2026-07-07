@@ -198,6 +198,8 @@ utils::head(global_heatmap$structural_zero)
 Bars show the BMI model coefficients for families selected by the global test. Error bars represent plus or minus one standard error. Positive log-fold changes are red and negative log-fold changes are blue. Fully opaque bars are sensitivity-robust, whereas semi-transparent bars did not pass the pseudo-count sensitivity criterion.
 
 ```{r global-barplot}
+
+output$res_global
 global_barplot <- ancombcVizhelper::make_barplots(
   out = output,
   result = "res_global",
@@ -215,6 +217,26 @@ global_barplot$plot
 
 ```
 
+
+
+```{r}
+
+dunn_abundance <- ancombcVizhelper::make_abundance_lfc(
+  ps = ps,
+  out = output,
+  result = "res_dunn",
+  prefix = "bmi",
+  group = "bmi",
+  tax_level = "Family",
+  comparison = "lean",
+  groupnames = FALSE,
+  abundance_groups = c("overweight", "lean")
+)
+
+dunn_abundance$plot
+
+```
+
 ## Pairwise Directional Comparisons
 
 `res_pair` is appropriate when all pairwise directional contrasts are of interest. The `diff_*` results in this object correspond to mdFDR-controlled pairwise inference.
@@ -229,7 +251,6 @@ pairwise_heatmap <- ancombcVizhelper::make_heatmap(
   show_all = FALSE
 )
 pairwise_heatmap$plot
-
 ```
 
 ## Dunnett-Type Comparisons
@@ -278,6 +299,19 @@ trend_heatmap <- ancombcVizhelper::make_heatmap(
 )
 
 trend_heatmap$plot
+
+trend_barplot <- ancombcVizhelper::make_barplots(
+  out = output,
+  result = "res_trend",
+  prefix = "bmi",
+  title = "BMI trend-test results",
+  sensitivity = "keep",
+  show_all = FALSE
+)
+
+trend_barplot$plot
+
+
 ```
 
 ## Primary Result for a Continuous Covariate
@@ -289,7 +323,6 @@ age_barplot <- ancombcVizhelper::make_barplots(
   out = output,
   result = "res",
   prefix = "age",
-  title = "Family-level associations with age",
   sensitivity = "keep",
   show_all = FALSE,
   group_order = "mean",
@@ -297,6 +330,7 @@ age_barplot <- ancombcVizhelper::make_barplots(
 )
 
 age_barplot$plot
+
 ```
 
 ## Interpretation Notes

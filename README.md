@@ -135,3 +135,48 @@ After confirming the images, remove the HTML comment markers in the
 | `res_pair` | All pairwise directional comparisons with mdFDR control. |
 | `res_dunn` | Comparisons of each group against a predefined reference group. |
 | `res_trend` | Ordered trend testing across groups. |
+
+
+## Citation
+
+Kim, So-Yeon. n.d. *<span class="nocase">ancombcVizhelper</span>: Tidy
+and Visualize Results from ANCOM-BC2*.
+<https://github.com/KitHubb/ancombcVizhelper>.
+
+### R packages used
+
+| Package | Version |
+|---|---:|
+| ANCOMBC | 2.12.1 |
+| ancombcVizhelper | 1.0.2 |
+| base | 4.5.2 |
+| grid | 4.5.2 |
+| knitr | 1.51 |
+| lme4 | 2.0.1 |
+| microbiome | 1.32.0 |
+| patchwork | 1.3.2 |
+| phyloseq | 1.54.2 |
+| renv | 1.2.3 |
+| rmarkdown | 2.31 |
+| scales | 1.4.0 |
+| testthat | 3.3.2 |
+| tidyverse | 2.0.0 |
+| ggpicrust2 | 1.7.1 |
+
+### Key methodological and visualization references
+
+Lin H, Peddada SD. Multigroup analysis of compositions of microbiomes with
+covariate adjustments and repeated measures. *Nature Methods*. 2024;21:83–91.
+https://doi.org/10.1038/s41592-023-02092-7
+
+McMurdie PJ, Holmes S. phyloseq: An R package for reproducible interactive
+analysis and graphics of microbiome census data. *PLoS ONE*. 2013;8:e61217.
+https://doi.org/10.1371/journal.pone.0061217
+
+Wickham H. *ggplot2: Elegant Graphics for Data Analysis*. Springer-Verlag;
+2016. https://ggplot2.tidyverse.org
+
+Yang C, Mai J, Cao X, Burberry A, Cominelli F, Zhang L. ggpicrust2: an R
+package for PICRUSt2 predicted functional profile analysis and visualization.
+*Bioinformatics*. 2023;39(8):btad470.
+https://doi.org/10.1093/bioinformatics/btad470
