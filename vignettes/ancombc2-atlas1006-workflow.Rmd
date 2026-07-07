@@ -33,8 +33,8 @@ The workflow includes:
 
 # installation
 ```{r}
-# pak("KitHubb/ancombcVizhelper")
-# library(ancombcVizhelper)
+# pak::pak("KitHubb/ancombcVizhelper")
+library(ancombcVizhelper)
 
 
 
