@@ -12,7 +12,8 @@ make_barplots(
   sensitivity = base::c("keep", "robust_only"),
   show_all = FALSE,
   group_order = "mean",
-  order = base::c("asc", "desc")
+  order = base::c("asc", "desc"),
+  groupnames = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,10 @@ displayed result.}
 specific comparison name.}
 
 \item{order}{Taxon order direction.}
+
+\item{groupnames}{Logical; include the group-variable prefix in comparison
+labels (e.g., \code{bmi_lean}). When \code{FALSE}, only group levels are shown
+(e.g., \code{lean}).}
 }
 \value{
 A list with \code{data}, \code{structural_zero}, \code{result_type},

@@ -7,6 +7,9 @@
 #' @param out Full result object returned by `ANCOMBC::ancombc2()`.
 #' @param result Result table to visualize.
 #' @param prefix Prefix used to identify the target model coefficient.
+#' @param groupnames Logical; include the group-variable prefix in comparison
+#'   labels (e.g., `bmi_lean`). When `FALSE`, only group levels are shown
+#'   (e.g., `lean`).
 #' @param title Plot title.
 #' @param sensitivity Whether to retain all significant results or only
 #'   pseudo-count sensitivity-robust results.
@@ -27,7 +30,8 @@ make_barplots <- function(out,
                           sensitivity = base::c("keep", "robust_only"),
                           show_all = FALSE,
                           group_order = "mean",
-                          order = base::c("asc", "desc")) {
+                          order = base::c("asc", "desc"),
+                          groupnames = FALSE) {
   result <- base::match.arg(result)
   sensitivity <- base::match.arg(sensitivity)
   order <- base::match.arg(order)
@@ -37,7 +41,8 @@ make_barplots <- function(out,
     result = result,
     prefix = prefix,
     sensitivity = sensitivity,
-    show_all = show_all
+    show_all = show_all,
+    groupnames = groupnames
   )
 
   df_final <- prepared$data |>
@@ -45,37 +50,6 @@ make_barplots <- function(out,
       taxon = base::as.character(.data$taxon),
       comparison = base::as.character(.data$comparison)
     )
-
-  se_source_name <- if (result == "res_global") {
-    "res"
-  } else {
-    result
-  }
-
-  se_source <- .as_ancombc2_df(out[[se_source_name]], se_source_name)
-
-  comparison_order <- base::unique(df_final$comparison)
-
-  se_cols <- base::paste0("se_", comparison_order)
-
-  missing_se <- base::setdiff(se_cols, base::names(se_source))
-
-  if (base::length(missing_se) > 0) {
-    base::stop("The following SE columns are missing: ",
-               base::paste(missing_se, collapse = ", "))
-  }
-
-  df_se <- se_source |>
-    dplyr::select(dplyr::all_of(base::c("taxon", se_cols))) |>
-    tidyr::pivot_longer(
-      cols = dplyr::all_of(se_cols),
-      names_to = "comparison",
-      values_to = "se"
-    ) |>
-    dplyr::mutate(comparison = base::sub("^se_", "", .data$comparison))
-
-  df_final <- df_final |>
-    dplyr::left_join(df_se, by = base::c("taxon", "comparison"))
 
   if (sensitivity == "robust_only") {
     df_final <- df_final |>
@@ -117,7 +91,11 @@ make_barplots <- function(out,
 
   common_limits <- base::c(common_min - padding, common_max + padding)
 
-  groups <- comparison_order
+  groups <- base::levels(prepared$data$comparison)
+
+  if (base::is.null(groups)) {
+    groups <- base::unique(df_final$comparison)
+  }
 
   if (group_order == "none") {
     taxon_order <- base::unique(df_final$taxon)
@@ -218,6 +196,7 @@ make_barplots <- function(out,
         axis.text.x = ggplot2::element_text(size = 10),
         plot.margin = ggplot2::margin(3, 6, 3, 3)
       )
+
 
     if (i == 1) {
       p <- p +

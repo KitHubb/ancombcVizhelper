@@ -7,6 +7,9 @@
 #' @param out Full result object returned by `ANCOMBC::ancombc2()`.
 #' @param result Result table to visualize.
 #' @param prefix Prefix used to identify the target model coefficient.
+#' @param groupnames Logical; include the group-variable prefix in comparison
+#'   labels (e.g., `bmi_lean`). When `FALSE`, only group levels are shown
+#'   (e.g., `lean`).
 #' @param title Plot title.
 #' @param sensitivity Whether to retain all significant results or only
 #'   pseudo-count sensitivity-robust results.
@@ -22,7 +25,8 @@ make_heatmap <- function(out,
                          prefix = NULL,
                          title = "ANCOM-BC2 log fold changes",
                          sensitivity = base::c("keep", "robust_only"),
-                         show_all = TRUE) {
+                         show_all = TRUE,
+                         groupnames = FALSE) {
   result <- base::match.arg(result)
   sensitivity <- base::match.arg(sensitivity)
 
@@ -31,7 +35,8 @@ make_heatmap <- function(out,
     result = result,
     prefix = prefix,
     sensitivity = sensitivity,
-    show_all = show_all
+    show_all = show_all,
+    groupnames = groupnames
   )
 
   df_final <- prepared$data

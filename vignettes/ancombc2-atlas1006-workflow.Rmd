@@ -160,9 +160,12 @@ The global test first identifies taxa with evidence of an overall difference amo
 `output$res`.
 
 ```{r global-heatmap}
+
+
+
 global_heatmap <- ancombcVizhelper::make_heatmap(
   out = output,
-  result = "res_global",
+  result = "res_dunn",
   prefix = "bmi",
   title = "Global ANCOM-BC2 BMI-associated families",
   sensitivity = "keep",
@@ -170,6 +173,7 @@ global_heatmap <- ancombcVizhelper::make_heatmap(
 )
 
 global_heatmap$plot
+
 ```
 
 Structural-zero taxa are excluded from log-fold change plots because their
@@ -196,6 +200,7 @@ global_barplot <- ancombcVizhelper::make_barplots(
 )
 
 global_barplot$plot
+
 ```
 
 ## Pairwise Directional Comparisons
@@ -230,6 +235,17 @@ dunnett_heatmap <- ancombcVizhelper::make_heatmap(
 )
 
 dunnett_heatmap$plot
+
+dunnett_barplot <- ancombcVizhelper::make_barplots(
+  out = output,
+  result = "res_dunn",
+  prefix = "bmi",
+  title = "BMI comparisons against obese participants",
+  sensitivity = "keep",
+  show_all = FALSE
+)
+
+dunnett_barplot$plot
 
 ```
 

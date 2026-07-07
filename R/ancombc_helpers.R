@@ -43,6 +43,59 @@
 }
 
 
+.pivot_ancombc_metric <- function(x, suffix, metric, value_name) {
+  metric_cols <- base::paste0(metric, "_", suffix)
+
+  x |>
+    dplyr::select(dplyr::all_of(base::c("taxon", metric_cols))) |>
+    tidyr::pivot_longer(
+      cols = dplyr::all_of(metric_cols),
+      names_to = "comparison",
+      values_to = value_name
+    ) |>
+    dplyr::mutate(
+      comparison = base::sub(
+        base::paste0("^", metric, "_"),
+        "",
+        .data$comparison
+      )
+    )
+}
+
+
+.format_ancombc_comparison <- function(x,
+                                       prefix = NULL,
+                                       groupnames = FALSE) {
+  if (base::is.null(prefix) || !base::nzchar(prefix)) {
+    return(x)
+  }
+
+  base::vapply(x, function(comparison) {
+    terms <- base::strsplit(comparison, "_", fixed = TRUE)[[1]]
+
+    terms <- base::vapply(terms, function(term) {
+      if (!base::startsWith(term, prefix)) {
+        return(term)
+      }
+
+      level <- base::sub(base::paste0("^", prefix), "", term)
+
+      if (!base::nzchar(level)) {
+        return(if (groupnames) prefix else "")
+      }
+
+      if (groupnames) {
+        base::paste0(prefix, "_", level)
+      } else {
+        level
+      }
+    }, character(1))
+
+    base::paste(terms[base::nzchar(terms)], collapse = "_")
+  }, character(1))
+}
+
+
 .extract_structural_zeros <- function(out) {
   zero_ind <- out$zero_ind
 
@@ -105,7 +158,8 @@
                                        result = base::c("res", "res_pair", "res_dunn", "res_global", "res_trend"),
                                        prefix = NULL,
                                        sensitivity = base::c("keep", "robust_only"),
-                                       show_all = TRUE) {
+                                       show_all = TRUE,
+                                       groupnames = FALSE) {
   result <- base::match.arg(result)
   sensitivity <- base::match.arg(sensitivity)
 
@@ -135,8 +189,15 @@
     suffix <- base::sub("^lfc_", "", lfc_cols)
     diff_cols <- base::paste0("diff_", suffix)
     ss_cols <- base::paste0("passed_ss_", suffix)
+    se_cols <- base::paste0("se_", suffix)
+    W_cols <- base::paste0("W_", suffix)
+    p_cols <- base::paste0("p_", suffix)
+    q_cols <- base::paste0("q_", suffix)
 
-    missing_cols <- base::setdiff(base::c(diff_cols, ss_cols), base::names(result_tbl))
+    missing_cols <- base::setdiff(
+      base::c(diff_cols, ss_cols, se_cols, W_cols, p_cols, q_cols),
+      base::names(result_tbl)
+    )
 
     if (base::length(missing_cols) > 0) {
       base::stop(
@@ -154,6 +215,34 @@
         values_to = "lfc"
       ) |>
       dplyr::mutate(comparison = base::sub("^lfc_", "", .data$comparison))
+
+    df_se <- .pivot_ancombc_metric(
+      x = result_tbl,
+      suffix = suffix,
+      metric = "se",
+      value_name = "se"
+    )
+
+    df_W <- .pivot_ancombc_metric(
+      x = result_tbl,
+      suffix = suffix,
+      metric = "W",
+      value_name = "W"
+    )
+
+    df_p <- .pivot_ancombc_metric(
+      x = result_tbl,
+      suffix = suffix,
+      metric = "p",
+      value_name = "p"
+    )
+
+    df_q <- .pivot_ancombc_metric(
+      x = result_tbl,
+      suffix = suffix,
+      metric = "q",
+      value_name = "q"
+    )
 
     df_diff <- result_tbl |>
       dplyr::select(dplyr::all_of(base::c("taxon", diff_cols))) |>
@@ -180,6 +269,10 @@
       )
 
     df_final <- df_lfc |>
+      dplyr::left_join(df_se, by = base::c("taxon", "comparison")) |>
+      dplyr::left_join(df_W, by = base::c("taxon", "comparison")) |>
+      dplyr::left_join(df_p, by = base::c("taxon", "comparison")) |>
+      dplyr::left_join(df_q, by = base::c("taxon", "comparison")) |>
       dplyr::left_join(df_diff, by = base::c("taxon", "comparison")) |>
       dplyr::left_join(df_ss, by = base::c("taxon", "comparison"))
 
@@ -209,12 +302,24 @@
                                  prefix = prefix,
                                  require_diff = TRUE)
 
-    required_cols <- base::c("diff_abn", "passed_ss")
+    suffix <- base::sub("^lfc_", "", lfc_cols)
+    se_cols <- base::paste0("se_", suffix)
 
-    missing_cols <- base::setdiff(required_cols, base::names(result_tbl))
+    required_cols <- base::c(
+      "W",
+      "p_val",
+      "q_val",
+      "diff_abn",
+      "passed_ss"
+    )
+
+    missing_cols <- base::setdiff(
+      base::c(required_cols, se_cols),
+      base::c(base::names(result_tbl), base::names(lfc_source))
+    )
 
     if (base::length(missing_cols) > 0) {
-      base::stop("The following required columns are missing from `res_global`: ",
+      base::stop("The following required columns are missing from `res_global` or `res`: ",
                  base::paste(missing_cols, collapse = ", "))
     }
 
@@ -227,17 +332,28 @@
       ) |>
       dplyr::mutate(comparison = base::sub("^lfc_", "", .data$comparison))
 
+    df_se <- .pivot_ancombc_metric(
+      x = lfc_source,
+      suffix = suffix,
+      metric = "se",
+      value_name = "se"
+    )
+
     df_status <- result_tbl |>
       dplyr::transmute(
         taxon = .data$taxon,
+        W = .data$W,
+        p = .data$p_val,
+        q = .data$q_val,
         significant = base::as.logical(.data$diff_abn),
         passed_ss = base::as.logical(.data$passed_ss)
       )
 
     df_final <- df_lfc |>
+      dplyr::left_join(df_se, by = base::c("taxon", "comparison")) |>
       dplyr::left_join(df_status, by = "taxon")
 
-    comparison_order <- base::sub("^lfc_", "", lfc_cols)
+    comparison_order <- suffix
 
     inference_note <-
       "Global ANCOM-BC2 result: taxa are selected using the taxon-level global test; displayed LFCs are group coefficients from out$res."
@@ -248,7 +364,17 @@
                                  prefix = prefix,
                                  require_diff = FALSE)
 
-    required_cols <- base::c("diff_abn", "passed_ss")
+    suffix <- base::sub("^lfc_", "", lfc_cols)
+    se_cols <- base::paste0("se_", suffix)
+
+    required_cols <- base::c(
+      "W",
+      "p_val",
+      "q_val",
+      "diff_abn",
+      "passed_ss",
+      se_cols
+    )
 
     missing_cols <- base::setdiff(required_cols, base::names(result_tbl))
 
@@ -266,17 +392,28 @@
       ) |>
       dplyr::mutate(comparison = base::sub("^lfc_", "", .data$comparison))
 
+    df_se <- .pivot_ancombc_metric(
+      x = result_tbl,
+      suffix = suffix,
+      metric = "se",
+      value_name = "se"
+    )
+
     df_status <- result_tbl |>
       dplyr::transmute(
         taxon = .data$taxon,
+        W = .data$W,
+        p = .data$p_val,
+        q = .data$q_val,
         significant = base::as.logical(.data$diff_abn),
         passed_ss = base::as.logical(.data$passed_ss)
       )
 
     df_final <- df_lfc |>
+      dplyr::left_join(df_se, by = base::c("taxon", "comparison")) |>
       dplyr::left_join(df_status, by = "taxon")
 
-    comparison_order <- base::sub("^lfc_", "", lfc_cols)
+    comparison_order <- suffix
 
     inference_note <-
       "Trend ANCOM-BC2 result: taxa are selected using the taxon-level trend test; displayed LFCs describe the fitted group coefficients."
@@ -354,6 +491,18 @@
                reason,
                " Set `show_all = TRUE` to retain non-significant taxa in the output data.")
   }
+
+  df_final$comparison <- .format_ancombc_comparison(
+    x = base::as.character(df_final$comparison),
+    prefix = prefix,
+    groupnames = groupnames
+  )
+
+  comparison_order <- .format_ancombc_comparison(
+    x = comparison_order,
+    prefix = prefix,
+    groupnames = groupnames
+  )
 
   taxon_order <- base::unique(base::as.character(df_final$taxon))
 

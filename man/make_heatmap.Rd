@@ -10,7 +10,8 @@ make_heatmap(
   prefix = NULL,
   title = "ANCOM-BC2 log fold changes",
   sensitivity = base::c("keep", "robust_only"),
-  show_all = TRUE
+  show_all = TRUE,
+  groupnames = FALSE
 )
 }
 \arguments{
@@ -27,6 +28,10 @@ pseudo-count sensitivity-robust results.}
 
 \item{show_all}{Logical; retain all taxa or only taxa with at least one
 displayed result.}
+
+\item{groupnames}{Logical; include the group-variable prefix in comparison
+labels (e.g., \code{bmi_lean}). When \code{FALSE}, only group levels are shown
+(e.g., \code{lean}).}
 }
 \value{
 A list with \code{data}, \code{structural_zero}, \code{result_type},
