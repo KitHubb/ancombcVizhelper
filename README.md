@@ -139,11 +139,6 @@ After confirming the images, remove the HTML comment markers in the
 | `res_trend` | Ordered trend testing across groups. |
 
 
-## Citation
-
-Kim, So-Yeon. n.d. *<span class="nocase">ancombcVizhelper</span>: Tidy
-and Visualize Results from ANCOM-BC2*.
-<https://github.com/KitHubb/ancombcVizhelper>.
 
 ### R packages used
 
