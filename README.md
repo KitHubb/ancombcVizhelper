@@ -1,4 +1,7 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21289123.svg)](https://doi.org/10.5281/zenodo.21289123)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21289123.svg)](https://doi.org/10.5281/zenodo.21289123) [![GitHub Release](https://img.shields.io/github/v/release/KitHubb/ancombcVizhelper)](https://github.com/KitHubb/ancombcVizhelper/releases)
+![R](https://img.shields.io/badge/R-%3E%3D4.5-blue)
+![License](https://img.shields.io/github/license/KitHubb/ancombcVizhelper)
+![GitHub stars](https://img.shields.io/github/stars/KitHubb/ancombcVizhelper)
 
 # ancombcVizhelper
 
