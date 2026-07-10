@@ -140,7 +140,13 @@ After confirming the images, remove the HTML comment markers in the
 | `res_dunn` | Comparisons of each group against a predefined reference group. |
 | `res_trend` | Ordered trend testing across groups. |
 
+## Citation
 
+If you use **ancombcVizhelper** in your research, please cite the archived software release available on Zenodo.
+
+The recommended citation is provided on the Zenodo record:
+
+https://doi.org/10.5281/zenodo.21289123
 
 ### R packages used
 
